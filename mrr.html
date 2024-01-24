@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Charlie - Your English Butler</title>
+  <style>
+    #chat-container {
+      max-width: 400px;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .user-message {
+      background-color: #3498db;
+      color: #fff;
+      border-radius: 5px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    .charlie-message {
+      background-color: #2ecc71;
+      color: #fff;
+      border-radius: 5px;
+      padding: 8px;
+      margin-bottom: 10px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+<div id="chat-container">
+  <div id="chat"></div>
+  <input type="text" id="user-input" placeholder="Type your message...">
+  <button onclick="sendMessage()">Send</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+  const apiKey = "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";
+  const chatContainer = $("#chat");
+  const userInput = $("#user-input");
+
+  function sendMessage() {
+    const userMessage = userInput.val();
+    appendMessage("user", userMessage);
+
+    // Call OpenAI API to get Charlie's response
+    fetch("https://api.openai.com/v1/engines/davinci-codex/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        prompt: userMessage,
+        max_tokens: 150
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      const charlieResponse = data.choices[0].text.trim();
+      appendMessage("charlie", charlieResponse);
+    })
+    .catch(error => console.error("Error:", error));
+
+    userInput.val("");
+  }
+
+  function appendMessage(sender, message) {
+    const messageElement = $("<div></div>").addClass(`${sender}-message`).text(message);
+    chatContainer.append(messageElement);
+  }
+</script>
+
+</body>
+</html>
